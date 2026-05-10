@@ -15,7 +15,7 @@ public class Bank {
     private List<Customer> customerList;
 
     public Bank() {
-        this.customerList = new ArrayList<>()
+        this.customerList = new ArrayList<>();
     };
     public List<Customer> getCustomerList() {
         return customerList;
