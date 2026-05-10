@@ -24,9 +24,9 @@ jobs:
           distribution: 'temurin'
           cache: maven # Tối ưu hóa thời gian build bằng cách cache các dependencies
 
-      # Bước 3: Thực thi vòng đời Maven (chạy test và đóng gói .jar)
+      # Bước 3: Thực thi vòng đời Maven
       - name: Build with Maven (Test and Package)
-        run: mvn clean package
+        run: mvn -B clean package
 
       # Bước 4: Upload file .jar sau khi build thành công
       - name: Upload JAR artifact
