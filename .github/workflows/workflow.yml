@@ -1,6 +1,5 @@
-name: Java CI with Maven
+name: Cross-Platform CI with Matrix
 
-# Kích hoạt workflow khi có push hoặc pull request lên nhánh main
 on:
   push:
     branches: [ "main" ]
@@ -9,31 +8,31 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest # Chạy trên môi trường Ubuntu mới nhất
+    # Áp dụng chiến lược Matrix
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    # Sử dụng biến os từ matrix
+    runs-on: ${{ matrix.os }}
 
     steps:
-      # Bước 1: Clone mã nguồn từ repository về máy trạm (runner)
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      # Bước 2: Cài đặt môi trường Java (JDK)
+
       - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: '17' # Bạn có thể đổi sang 11, 21 tùy phiên bản dự án
+          java-version: '17'
           distribution: 'temurin'
-          cache: maven # Tối ưu hóa thời gian build bằng cách cache các dependencies
+          cache: maven
 
-      # Bước 3: Thực thi vòng đời Maven
-      - name: Build with Maven (Test and Package)
+      - name: Build and Test with Maven
         run: mvn -B clean package
 
-      # Bước 4: Upload file .jar sau khi build thành công
       - name: Upload JAR artifact
-        # Đảm bảo step này chạy kể cả khi test fail (nếu bạn muốn lấy file debug),
-        # nhưng ở đây ta mặc định chỉ upload nếu build thành công.
+        if: matrix.os == 'ubuntu-latest' # Chỉ upload từ một môi trường để tránh trùng lặp
         uses: actions/upload-artifact@v4
         with:
           name: BTVN_WEEK9-artifact
           path: target/*.jar
-          retention-days: 7 # Lưu trữ artifact trong 7 ngày
