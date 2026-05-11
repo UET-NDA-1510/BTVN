@@ -8,6 +8,8 @@ on:
 jobs:
   checkstyle-and-test:
     runs-on: ubuntu-latest
+
+    # Cấp quyền cho GitHub Actions Bot được phép comment vào PR
     permissions:
       contents: read
       pull-requests: write
@@ -19,7 +21,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '17' # Sửa theo phiên bản dự án của bạn
           distribution: 'temurin'
           cache: maven
 
@@ -32,5 +34,8 @@ jobs:
         uses: dbelyaev/action-checkstyle@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # github-pr-review: Bot sẽ comment trực tiếp vào từng dòng code lỗi trong tab "Files changed"
           reporter: github-pr-review
           level: error
+          # Mặc định action này sẽ tìm file checkstyle của dự án,
+          # nếu dự án bạn dùng chuẩn của Google hoặc Sun, action tự động nhận diện.
