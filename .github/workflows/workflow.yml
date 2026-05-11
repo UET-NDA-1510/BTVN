@@ -1,44 +1,36 @@
-name: Cross-Platform CI with Matrix
+name: Automated Code Review
 
+# 1. Trigger: Tự động chạy khi có PR hướng vào nhánh main
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
+  checkstyle-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 25
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-      # Thay đổi: Dùng lệnh verify để kích hoạt JaCoCo check
-      - name: Build and Verify Coverage
-        run: mvn -B clean verify
+      # Chạy test để đảm bảo code không có lỗi logic
+      - name: Run Unit Tests
+        run: mvn clean test
 
-      - name: Upload JAR artifact
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+      # 2. Inline Feedback: Sử dụng action để comment lỗi định dạng
+      - name: Run Checkstyle Reviewdog
+        uses: dbelyaev/action-checkstyle@master
         with:
-          name: BTVN_WEEK9-artifact
-          path: target/*.jar
-
-      - name: Upload JaCoCo Coverage Report
-        if: always() && matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: target/site/jacoco/
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: error
