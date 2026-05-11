@@ -1,6 +1,5 @@
-name: Automated Code Review
+name: Automated Code Review & Build
 
-# 1. Trigger: Tự động chạy khi có PR hướng vào nhánh main
 on:
   pull_request:
     branches: [ "main" ]
@@ -9,7 +8,6 @@ jobs:
   checkstyle-and-test:
     runs-on: ubuntu-latest
 
-    # Cấp quyền cho GitHub Actions Bot được phép comment vào PR
     permissions:
       contents: read
       pull-requests: write
@@ -21,21 +19,20 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17' # Sửa theo phiên bản dự án của bạn
+          java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-      # Chạy test để đảm bảo code không có lỗi logic
-      - name: Run Unit Tests
-        run: mvn clean test
-
-      # 2. Inline Feedback: Sử dụng action để comment lỗi định dạng
       - name: Run Checkstyle Reviewdog
         uses: dbelyaev/action-checkstyle@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # github-pr-review: Bot sẽ comment trực tiếp vào từng dòng code lỗi trong tab "Files changed"
           reporter: github-pr-review
           level: error
-          # Mặc định action này sẽ tìm file checkstyle của dự án,
-          # nếu dự án bạn dùng chuẩn của Google hoặc Sun, action tự động nhận diện.
+      - name: Run Unit Tests and Build JAR
+        run: mvn -B clean package
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-executable-jar
+          path: target/*.jar
