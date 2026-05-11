@@ -4,16 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileManagerTest {
     @Test
-    public void testCreatePath() {
+    public void testCreatePathCrossPlatform() {
         FileManager fm = new FileManager();
-
-        // Output của hàm (luôn bị hardcode là dấu \)
         String result = fm.createPath("data", "report.txt");
 
-        // Giá trị mong đợi ĐÚNG PHẢI LÀ dấu của hệ điều hành đang chạy
+        // Sử dụng File.separator để lấy dấu gạch chéo đúng của môi trường hiện tại
         String expected = "data" + File.separator + "report.txt";
 
-        // Tiến hành so sánh
-        assertEquals(expected, result, "Đường dẫn bị sai định dạng OS!");
+        assertEquals(expected, result, "Đường dẫn phải tương thích với OS hiện tại");
     }
 }
